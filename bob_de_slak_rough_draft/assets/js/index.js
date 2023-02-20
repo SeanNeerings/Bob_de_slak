@@ -69,7 +69,7 @@ var Player = class Player {
                       new Vec(0, 0));
   }
 }
-
+console.log(Player)
 Player.prototype.size = new Vec(2.4 , 1.5);
 
 var Lava = class Lava {
@@ -112,13 +112,18 @@ var Coin = class Coin {
 
 Coin.prototype.size = new Vec(0.6, 0.6);
 
+var Button = class Button {
+  constructor(pos,){
+    this.pos = pos
+  }
+}
 var levelChars = {
   // ".": "empty", "#": "wall", "+": "lava",
   // "@": Player, "o": Coin,
   // "=": Lava, "|": Lava, "v": Lava
 
   ".": "empty", "#": "wall", "+": "lava", "-": "grass", "%": "button", "b": "blockshower",
-  "@": Player, "o": Coin,
+  "@": Player, "o": Coin, "&" : Button,
   "=": Lava, "|": Lava, "v": Lava
 };
 
@@ -288,18 +293,34 @@ function speed2() {
   playerXSpeed = 14;
 }
 
+var buttonCondition = 'on';
+
 function darkMode() {
   var zon = document.querySelector(".zon");
-  // var background = document.querySelector("body");
+  var background = document.querySelector("body");
+  var game_background = document.querySelector(".background");
 
-  // background.style.backgroundImage = "url('../img/stars.png)";
-  zon.style.backgroundImage = "url('../img/moon.png)";
+  if (buttonCondition === 'on') {
+
+  zon.classList.add('moon');
+  background.classList.add('dark_background');
+  game_background.classList.add('game_background');
+  buttonCondition = 'off';
+  } else {
+    zon.classList.remove('moon');
+    background.classList.remove('dark_background');
+    game_background.classList.remove('game_background');
+    buttonCondition = 'on';
+    console.log('halloo');
+  }
 }
 
 Player.prototype.update = function(time, state, keys) {
   let xSpeed = 0;
   if (keys.ArrowLeft) xSpeed -= playerXSpeed;
-  // if (keys.ArrowLeft) {document.querySelectorAll('table tr td .player').style.transform = "scaleX(-1)"};
+  
+  // if (keys.ArrowLeft) {document.querySelectorAll('.actors').style.transform = "scaleX(-1)"};
+  // if (keys.ArrowLeft) {document.getElementsByClassName(this.pos).style.transform = "scaleX(-1)"};
   if (keys.ArrowRight) xSpeed += playerXSpeed;
   let pos = this.pos;
   let movedX = pos.plus(new Vec(xSpeed * time, 0));
@@ -317,6 +338,7 @@ Player.prototype.update = function(time, state, keys) {
     ySpeed = 0;
   }
   return new Player(pos, new Vec(xSpeed, ySpeed));
+
 };
 
 

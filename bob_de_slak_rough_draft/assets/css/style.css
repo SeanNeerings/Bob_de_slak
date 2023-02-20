@@ -31,7 +31,7 @@ body {
 }
 
 .background {
-  background: rgb(52, 166, 251);
+  background: #34a6fb;
   table-layout: fixed;
   border-spacing: 0;
 }
@@ -125,7 +125,7 @@ body {
 
 .blockshower{
   background-image: url("../img/block_shower.png");
-  background-size:contain ;
+  background-size: contain ;
 }
 
 .zon {
@@ -139,4 +139,19 @@ body {
   background-image: url("../img/zon.png");
   background-repeat: no-repeat;
   background-size: contain;
+  cursor: pointer;
+}
+
+.moon {
+  background-image: url("../img/moon.png");
+}
+
+.dark_background {
+  background: url("../img/stars.png");
+  table-layout: fixed;
+  border-spacing: 0;
+}
+
+.game_background {
+  background-color: rgba(81, 0, 122, 0.65);
 }
