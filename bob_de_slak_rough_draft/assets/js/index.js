@@ -69,7 +69,7 @@ var Player = class Player {
                       new Vec(0, 0));
   }
 }
-
+// console.log(Player)
 Player.prototype.size = new Vec(2.4 , 1.5);
 
 var Lava = class Lava {
@@ -92,7 +92,28 @@ var Lava = class Lava {
   }
 }
 
-Lava.prototype.size = new Vec(1, 6);
+Lava.prototype.size = new Vec(1, 2);
+
+var Button = class Button {
+  constructor(pos, basePos, wobble) {
+    this.pos = pos;
+    this.basePos = basePos;
+    this.wobble = wobble;
+  }
+
+  get type() { return "Button"; }
+
+  static create(pos) {
+    let basePos = pos.plus(new Vec(0.2, 0.1));
+    return new Button(basePos, basePos,
+                    Math.random() * Math.PI * 2);
+                    
+  }
+ 
+ 
+}
+
+Button.prototype.size = new Vec(0.8, 0.8);
 
 var Coin = class Coin {
   constructor(pos, basePos, wobble) {
@@ -101,24 +122,28 @@ var Coin = class Coin {
     this.wobble = wobble;
   }
 
+  
+
   get type() { return "coin"; }
 
   static create(pos) {
-    let basePos = pos.plus(new Vec(0.2, 0.1));
+    let basePos = pos.plus(new Vec(0, 0));
     return new Coin(basePos, basePos,
-                    Math.random() * Math.PI * 2);
+                    Math.random(5) * Math.PI * 2);
   }
 }
 
+
 Coin.prototype.size = new Vec(0.6, 0.6);
+
 
 var levelChars = {
   // ".": "empty", "#": "wall", "+": "lava",
   // "@": Player, "o": Coin,
   // "=": Lava, "|": Lava, "v": Lava
 
-  ".": "empty", "#": "wall", "+": "lava", "-": "grass", "%": "button", "b": "blockshower",
-  "@": Player, "o": Coin,
+  ".": "empty", "#": "wall", "+": "lava", "-": "grass", "b": "blockshower", "l": "tube",
+  "@": Player, "o": Coin, "&" : Button,
   "=": Lava, "|": Lava, "v": Lava
 };
 
@@ -252,7 +277,15 @@ Lava.prototype.collide = function(state) {
 Coin.prototype.collide = function(state) {
   let filtered = state.actors.filter(a => a != this);
   let status = state.status;
-  if (!filtered.some(a => a.type == "coin")) status = "won";
+  if (!filtered.some(a => a.type == "coin")) status = Lava.remove;
+  return new State(state.level, filtered, status);
+};
+
+Button.prototype.collide = function(state) {
+  let filtered = state.actors.filter(a => a != this);
+  let status = state.status;
+  if (!filtered.some(a => a.type == "button")) status = "lavagone";
+  // return new State(state.level, state.actors, "lost");
   return new State(state.level, filtered, status);
 };
 
@@ -276,6 +309,13 @@ Coin.prototype.update = function(time) {
                   this.basePos, wobble);
 };
 
+Button.prototype.update = function(time) {
+  let wobble = this.wobble + time * wobbleSpeed;
+  let wobblePos = Math.sin(wobble) * wobbleDist;
+  return new Button(this.basePos.plus(new Vec(0, wobblePos)),
+                  this.basePos, wobble);
+};
+
 var playerXSpeed = 7;
 var gravity = 30;
 var jumpSpeed = 17;
@@ -288,18 +328,33 @@ function speed2() {
   playerXSpeed = 14;
 }
 
+var buttonCondition = 'on';
+
 function darkMode() {
   var zon = document.querySelector(".zon");
-  // var background = document.querySelector("body");
+  var background = document.querySelector("body");
+  var game_background = document.querySelector(".background");
 
-  // background.style.backgroundImage = "url('../img/stars.png)";
-  zon.style.backgroundImage = "url('../img/moon.png)";
+  if (buttonCondition === 'on') {
+
+  zon.classList.add('moon');
+  background.classList.add('dark_background');
+  game_background.classList.add('game_background');
+  buttonCondition = 'off';
+  } else {
+    zon.classList.remove('moon');
+    background.classList.remove('dark_background');
+    game_background.classList.remove('game_background');
+    buttonCondition = 'on';
+  }
 }
 
 Player.prototype.update = function(time, state, keys) {
   let xSpeed = 0;
   if (keys.ArrowLeft) xSpeed -= playerXSpeed;
-  // if (keys.ArrowLeft) {document.querySelectorAll('table tr td .player').style.transform = "scaleX(-1)"};
+  
+  // if (keys.ArrowLeft) {document.querySelectorAll('.actors').style.transform = "scaleX(-1)"};
+  // if (keys.ArrowLeft) {document.getElementsByClassName(this.pos).style.transform = "scaleX(-1)"};
   if (keys.ArrowRight) xSpeed += playerXSpeed;
   let pos = this.pos;
   let movedX = pos.plus(new Vec(xSpeed * time, 0));
@@ -317,6 +372,7 @@ Player.prototype.update = function(time, state, keys) {
     ySpeed = 0;
   }
   return new Player(pos, new Vec(xSpeed, ySpeed));
+
 };
 
 
@@ -378,6 +434,9 @@ async function runGame(plans, Display) {
     let status = await runLevel(new Level(plans[level]),
                                 Display);
     if (status == "won") level++;
-  }
+    if (status == "lavagone") {
+      console.log('poep')
+  };
   console.log("You've won!");
+}
 }
